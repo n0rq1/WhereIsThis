@@ -24,38 +24,60 @@ class HomeScreen extends StatelessWidget {
       textStyle: const TextStyle(fontSize: 20),
       backgroundColor: Colors.blue[800],
       side: BorderSide(width: 2, color:Colors.blue),
+      fixedSize: Size(140,35),
+      shadowColor: Colors.black,
+    );
+
+    final ButtonStyle playStyle = ElevatedButton.styleFrom(
+      textStyle: const TextStyle(fontSize: 20),
+      backgroundColor: Colors.blue[800],
+      side: BorderSide(width: 2, color:Colors.blue),
+      fixedSize: Size(75,35),
+      shadowColor: Colors.black,
     );
 
     return Scaffold(
-      body: Center(
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            ElevatedButton(
-              onPressed: () {
-                // Handle Settings button click
-              },
-              child: Text("Settings"),
-              style: style,
+      body: Stack(
+        children: [
+          // Background Image
+          Positioned.fill(
+            child: Image.asset(
+              'images/ButteHomeScreen.png',
+              fit: BoxFit.cover,
             ),
-            SizedBox(width: 96),
-            ElevatedButton(
-              onPressed: () {
-                // Handle Play button click
-              },
-              child: Text("Play"),
-              style: style,
+          ),
+
+          Center(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                ElevatedButton(
+                  onPressed: () {
+                    // Handle Settings button click
+                  },
+                  child: Text("Settings"),
+                  style: style,
+                ),
+                SizedBox(width: 10),
+                ElevatedButton(
+                  onPressed: () {
+                    // Handle Play button click
+                  },
+                  child: Text("Play"),
+                  style: playStyle
+                ),
+                SizedBox(width: 10),
+                ElevatedButton(
+                  onPressed: () {
+                    // Handle Scores button click
+                  },
+                  child: Text("Add Photos"),
+                  style: style,
+                ),
+              ],
             ),
-            SizedBox(width: 96),
-            ElevatedButton(
-              onPressed: () {
-                // Handle Scores button click
-              },
-              child: Text("Scores"),
-              style: style,
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
