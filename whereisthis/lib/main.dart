@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'screens/addphotos.dart';
+import 'screens/play.dart';
+import 'screens/settings.dart';
 
 void main() {
   runApp(const MyApp());
@@ -39,7 +42,6 @@ class HomeScreen extends StatelessWidget {
     return Scaffold(
       body: Stack(
         children: [
-          // Background Image
           Positioned.fill(
             child: Image.asset(
               'images/ButteHomeScreen.png',
@@ -53,7 +55,9 @@ class HomeScreen extends StatelessWidget {
               children: [
                 ElevatedButton(
                   onPressed: () {
-                    // Handle Settings button click
+                    Navigator.push(
+                      context, MaterialPageRoute(builder: (context) => SettingsScreen()),
+                    );
                   },
                   child: Text("Settings"),
                   style: style,
@@ -61,7 +65,9 @@ class HomeScreen extends StatelessWidget {
                 SizedBox(width: 10),
                 ElevatedButton(
                   onPressed: () {
-                    // Handle Play button click
+                    Navigator.push(
+                      context, MaterialPageRoute(builder: (context) => PlayScreen()),
+                    );
                   },
                   child: Text("Play"),
                   style: playStyle
@@ -69,7 +75,9 @@ class HomeScreen extends StatelessWidget {
                 SizedBox(width: 10),
                 ElevatedButton(
                   onPressed: () {
-                    // Handle Scores button click
+                    Navigator.push(
+                      context, MaterialPageRoute(builder: (context) => AddPhotosScreen()),
+                    );
                   },
                   child: Text("Add Photos"),
                   style: style,
