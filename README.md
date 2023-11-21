@@ -1,11 +1,11 @@
 <a name="readme-top"></a>
 
-[![Contributors](https://img.shields.io/github/contributors/your-username/your-repo.svg)](https://github.com/AustinNorquist/WhereIsThis/graphs/contributors)
-[![Forks](https://img.shields.io/github/forks/your-username/your-repo.svg)](https://github.com/AustinNorquist/WhereIsThis/network/members)
-[![Stargazers](https://img.shields.io/github/stars/your-username/your-repo.svg)](https://github.com/AustinNorquist/WhereIsThis/stargazers)
-[![Issues](https://img.shields.io/github/issues/your-username/your-repo.svg)](https://github.com/AustinNorquist/WhereIsThis/issues)
-[![MIT License](https://img.shields.io/github/license/your-username/your-repo.svg)](https://opensource.org/licenses/MIT)
-[![LinkedIn](https://img.shields.io/badge/LinkedIn-your--username-blue.svg)](https://www.linkedin.com/in/austin-norquist/)
+[![Contributors](https://img.shields.io/github/contributors/AustinNorquist/WhereIsThis.svg)](https://github.com/AustinNorquist/WhereIsThis/graphs/contributors)
+[![Forks](https://img.shields.io/github/forks/AustinNorquist/WhereIsThis.svg)](https://github.com/AustinNorquist/WhereIsThis/network/members)
+[![Stargazers](https://img.shields.io/github/stars/AustinNorquist/WhereIsThis.svg)](https://github.com/AustinNorquist/WhereIsThis/stargazers)
+[![Issues](https://img.shields.io/github/issues/AustinNorquist/WhereIsThis.svg)](https://github.com/AustinNorquist/WhereIsThis/issues)
+[![MIT License](https://img.shields.io/github/license/AustinNorquist/WhereIsThis.svg)](https://opensource.org/licenses/MIT)
+[![LinkedIn](https://img.shields.io/badge/austin-norquist.svg)](https://www.linkedin.com/in/austin-norquist/)
 
 
 
