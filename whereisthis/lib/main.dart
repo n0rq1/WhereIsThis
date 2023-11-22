@@ -50,13 +50,13 @@ class HomeScreen extends StatelessWidget {
         children: [
           Positioned.fill(
             child: Image.asset(
-              'images/ButteHomeScreen.png',
+              'images/Home.jpg',
               fit: BoxFit.cover,
             ),
           ),
           Column(
             children: [
-              SizedBox(height: MediaQuery.of(context).padding.top), // Adjust for status bar
+              SizedBox(height: MediaQuery.of(context).padding.top),
               AppBar(
                 backgroundColor: Colors.transparent,
                 elevation: 0,
@@ -71,17 +71,38 @@ class HomeScreen extends StatelessWidget {
                                 MaterialPageRoute(builder: (context) => LoginScreen()),
                               );
                             },
-                            child: Text(
-                              'Login',
-                              style: TextStyle(
-                                fontSize: 18,
-                                color: Colors.blue[600],
-                                fontWeight: FontWeight.bold,
+                            child: ElevatedButton(
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(builder: (context) => LoginScreen()),
+                                );
+                              },
+                              child: Text("Login"),
+                              style: ElevatedButton.styleFrom(
+                                textStyle: const TextStyle(fontSize: 20),
+                                backgroundColor: Colors.blue[800],
+                                side: BorderSide(width: 2, color: Colors.blue),
+                                minimumSize: Size(0, 0),
+                                shadowColor: Colors.black,
                               ),
                             ),
                           ),
                         )
-                      : Container(),
+                      : Padding(
+                          padding: const EdgeInsets.only(right: 20.0),
+                          child: ElevatedButton(
+                            onPressed: () async {
+                              await FirebaseAuth.instance.signOut();
+                              Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(builder: (context) => HomeScreen()),
+                              );
+                            },
+                            child: Text("Logout"),
+                            style: style,
+                          ),
+                        ),
                 ],
               ),
               Expanded(
@@ -116,7 +137,7 @@ class HomeScreen extends StatelessWidget {
                           onPressed: () {
                             Navigator.push(
                               context,
-                              MaterialPageRoute(builder: (context) => AddPhotosScreen()),
+                              MaterialPageRoute(builder: (context) => AddPhotos()),
                             );
                           },
                           child: Text("Photos"),
