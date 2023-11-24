@@ -3,14 +3,18 @@ import 'screens/addphotos.dart';
 import 'screens/play.dart';
 import 'screens/settings.dart';
 import 'screens/login.dart';
-
+import 'firebase_options.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
-  runApp(const MyApp());
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+  runApp(MaterialApp(
+    home: MyApp(),
+  ));
 }
 
 class MyApp extends StatelessWidget {
@@ -137,7 +141,7 @@ class HomeScreen extends StatelessWidget {
                           onPressed: () {
                             Navigator.push(
                               context,
-                              MaterialPageRoute(builder: (context) => AddPhotos()),
+                              MaterialPageRoute(builder: (context) => AddPhotosScreen()),
                             );
                           },
                           child: Text("Photos"),
