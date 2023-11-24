@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:uuid/uuid.dart';
+import 'myphotos.dart';
 
 import 'package:firebase_core/firebase_core.dart';
 import '../firebase_options.dart';
@@ -87,8 +88,7 @@ class _AddPhotosScreenState extends State<AddPhotosScreen> {
 
     FirebaseAuth auth = FirebaseAuth.instance;
 
-      // Check if the user is signed in
-    if (auth.currentUser != null) {
+    if (auth.currentUser != null && imageFile != null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Processing Data')),
       );
@@ -96,32 +96,69 @@ class _AddPhotosScreenState extends State<AddPhotosScreen> {
       try {
         String photoUrl = await uploadFile(Uuid().v1());
         DocumentSnapshot userDocument = await FirebaseFirestore.instance
-          .collection('communityPhotos')
-          .doc('commPhotosId')
-          .get();
+            .collection('communityPhotos')
+            .doc('commPhotosId')
+            .get();
 
-          List<String> currentUrls =
-              List<String>.from(userDocument['url'] ?? []);
-          List<GeoPoint> currentLocations =
-              List<GeoPoint>.from(userDocument['location'] ?? []);
+        List<String> currentUrls =
+            List<String>.from(userDocument['url'] ?? []);
+        List<GeoPoint> currentLocations =
+            List<GeoPoint>.from(userDocument['location'] ?? []);
 
-          currentUrls.insert(0, photoUrl);
-          currentLocations.insert(0, GeoPoint(position!.latitude, position!.longitude));
+        currentUrls.insert(0, photoUrl);
+        currentLocations.insert(
+            0, GeoPoint(position!.latitude, position!.longitude));
 
-          final docRef = firestore.collection('communityPhotos').doc('commPhotosId');
-          await docRef.set({
-            'location': currentLocations,
-            'url': currentUrls,
+        final docRef =
+            firestore.collection('communityPhotos').doc('commPhotosId');
+        await docRef.set({
+          'location': currentLocations,
+          'url': currentUrls,
+        });
+
+        DocumentSnapshot userP = await FirebaseFirestore.instance
+            .collection('userPhotos')
+            .doc(auth.currentUser!.uid)
+            .collection('photos')
+            .doc('photosId')
+            .get();
+
+        List<String> userUrls =
+            List<String>.from(userP['url'] ?? []);
+        List<GeoPoint> userLocations =
+            List<GeoPoint>.from(userP['location'] ?? []);
+
+        userUrls.insert(0, photoUrl);
+        userLocations.insert(0, GeoPoint(position!.latitude, position!.longitude));
+
+        final test = 
+        firestore.collection('userPhotos').doc(auth.currentUser!.uid).collection('photos').doc('photosId');
+        await test.set({
+          'url': userUrls,
+          'location': userLocations,
+        });
+
+        print('Success.');
+
+        Future.delayed(const Duration(seconds: 1), () {
+          setState(() {
+            imageFile = null;
           });
-
-          print('Success.');
-        } catch (e) {
-          print('$e');
-        }
+        });
+      } catch (e) {
+        print('$e');
+      }
+    } else {
+      if (imageFile == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Please take a photo before submitting')),
+        );
       } else {
         print('User not signed in');
       }
     }
+  }
+
 
   Future<String> uploadFile(String filename) async {
     Reference ref = FirebaseStorage.instance.ref().child('$filename.jpg');
@@ -139,61 +176,33 @@ class _AddPhotosScreenState extends State<AddPhotosScreen> {
     return downloadURL;
   }
 
+  void _navigateToMyPhotos() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => MyPhotosScreen()),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Add a Photo"),
+        // title: Text("Add a Photo"),
       ),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
+            if (imageFile != null) // Show "Submit" button only if a photo is taken
+              ElevatedButton(
+                onPressed: buttonWorks ? _submit : null,
+                child: const Icon(Icons.cloud_upload),
+              ),
             ElevatedButton(
-              onPressed: buttonWorks ? _submit : null,
-              child: const Text("Submit"),
+              onPressed: _navigateToMyPhotos, // Redirect to MyPhotos screen
+              child: const Text("My Photos"),
             ),
             Text(displayString),
-            SizedBox(
-              height: 200,
-              width: 200,
-              child: imageFile != null
-                  ? Image.file(imageFile!)
-                  : Placeholder(
-                      fallbackHeight: 100,
-                      fallbackWidth: 100,
-                      child: Image.network(
-                        'https://cdn.pixabay.com/photo/2016/08/08/09/17/avatar-1577909_1280.png',
-                      ),
-                    ),
-            ),
-            FutureBuilder<Position>(
-              future: _futurePosition,
-              builder: (context, snapshot) {
-                if (snapshot.hasData) {
-                  return Text(
-                      'Lat: ${snapshot.data!.latitude}, Long: ${snapshot.data!.longitude}, Accuracy: ${snapshot.data!.accuracy}');
-                } else if (snapshot.hasError) {
-                  return Text('${snapshot.error}');
-                }
-
-                return const CircularProgressIndicator();
-              },
-            ),
-            StreamBuilder<Position>(
-              stream: positionStream,
-              builder:
-                  (BuildContext context, AsyncSnapshot<Position> snapshot) {
-                if (snapshot.hasData) {
-                  return Text(
-                      'Lat: ${snapshot.data!.latitude}, Long: ${snapshot.data!.longitude}, Accuracy: ${snapshot.data!.accuracy}');
-                } else if (snapshot.hasError) {
-                  return Text('${snapshot.error}');
-                }
-
-                return const CircularProgressIndicator();
-              },
-            ),
           ],
         ),
       ),
