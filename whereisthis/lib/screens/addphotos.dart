@@ -85,46 +85,43 @@ class _AddPhotosScreenState extends State<AddPhotosScreen> {
   void _submit() async {
     await _getPosition();
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Processing Data')),
-    );
+    FirebaseAuth auth = FirebaseAuth.instance;
 
-/*
-    try {
-      final docRef = firestore.collection('photos').doc('photoId');
-      await docRef.set({
-          'location': GeoPoint(position!.latitude, position!.longitude),
-          'url': "test",
-          'user': FirebaseAuth.instance.currentUser!.uid,
-        });
-        print('Success.');
-      } catch (e) {
-        print('$e');
-      }*/
-    DocumentSnapshot userDocument =
-    await FirebaseFirestore.instance.collection('communityPhotos').doc('commPhotosId').get();
+      // Check if the user is signed in
+    if (auth.currentUser != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Processing Data')),
+      );
 
-    List<String> currentUrls = List<String>.from(userDocument['url'] ?? []);
-    List<GeoPoint> currentLocations = List<GeoPoint>.from(userDocument['location'] ?? []);
-    currentUrls.insert(0, "Ab");
-    GeoPoint geoPoint = GeoPoint(37.7749, -122.4194);
-    currentLocations.insert(0, geoPoint);
-
-    if (position != null) {
       try {
-        final docRef = 
-        firestore.collection('communityPhotos').doc('commPhotosId');
-        await docRef.set({
-          'location': currentLocations,
-          'url': currentUrls,
-        });
-        print('Success.');
-      } catch (e) {
-        print('$e');
+        String photoUrl = await uploadFile(Uuid().v1());
+        DocumentSnapshot userDocument = await FirebaseFirestore.instance
+          .collection('communityPhotos')
+          .doc('commPhotosId')
+          .get();
+
+          List<String> currentUrls =
+              List<String>.from(userDocument['url'] ?? []);
+          List<GeoPoint> currentLocations =
+              List<GeoPoint>.from(userDocument['location'] ?? []);
+
+          currentUrls.insert(0, photoUrl);
+          currentLocations.insert(0, GeoPoint(position!.latitude, position!.longitude));
+
+          final docRef = firestore.collection('communityPhotos').doc('commPhotosId');
+          await docRef.set({
+            'location': currentLocations,
+            'url': currentUrls,
+          });
+
+          print('Success.');
+        } catch (e) {
+          print('$e');
+        }
+      } else {
+        print('User not signed in');
       }
     }
-  }
-
 
   Future<String> uploadFile(String filename) async {
     Reference ref = FirebaseStorage.instance.ref().child('$filename.jpg');
