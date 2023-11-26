@@ -101,18 +101,19 @@ class _AddPhotosScreenState extends State<AddPhotosScreen> {
             .get();
 
         List<String> currentUrls =
-            List<String>.from(userDocument['url'] ?? []);
-        List<GeoPoint> currentLocations =
-            List<GeoPoint>.from(userDocument['location'] ?? []);
+          List<String>.from(userDocument['url'] ?? []);
+
+        Map<String,GeoPoint> locationsMap = 
+          Map<String,GeoPoint>.from(userDocument['locations'] ?? [] );
 
         currentUrls.insert(0, photoUrl);
-        currentLocations.insert(
-            0, GeoPoint(position!.latitude, position!.longitude));
+
+        locationsMap[photoUrl] = GeoPoint(position!.latitude,position!.longitude);
 
         final docRef =
             firestore.collection('communityPhotos').doc('commPhotosId');
         await docRef.set({
-          'location': currentLocations,
+          'locations': locationsMap,
           'url': currentUrls,
         });
 
