@@ -81,7 +81,7 @@ class _AddPhotosScreenState extends State<AddPhotosScreen> {
 
   Future<void> _getPosition() async {
     position = await _futurePosition;
-    print('Latitude: ${position?.latitude}, Longitude: ${position?.longitude}');
+    //print('Latitude: ${position?.latitude}, Longitude: ${position?.longitude}');
   }
 
   void _submit() async {
