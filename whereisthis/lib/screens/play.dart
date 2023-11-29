@@ -1,22 +1,32 @@
 import '../main.dart';
 import 'postgame.dart';
+import 'map.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'dart:async';
 
 class PlayScreen extends StatefulWidget {
   @override
   _PlayScreenState createState() => _PlayScreenState();
 }
 
-class _PlayScreenState extends State<PlayScreen> {
+class _PlayScreenState extends State<PlayScreen> with SingleTickerProviderStateMixin {
   late List<String> photoUrls;
   late Map<String, GeoPoint> photoLocations;
   int currentIndex = 0;
   bool isLoading = true;
 
+  late AnimationController _animationController;
+  bool isMapVisible = false;
+
   @override
   void initState() {
     super.initState();
+    _animationController = AnimationController(
+      vsync: this,
+      duration: Duration(milliseconds: 500),
+    );
     photoUrls = [];
     photoLocations = {};
     fetchRandomPhotosAndLocations();
@@ -68,6 +78,21 @@ class _PlayScreenState extends State<PlayScreen> {
     });
   }
 
+  void onGuessPressed() {
+    setState(() {
+      isMapVisible = true;
+      _animationController.forward();
+    });
+  }
+
+  void closeMapAndMoveToNextPhoto() {
+    setState(() {
+      isMapVisible = false;
+      _animationController.reverse();
+      onNextPressed();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -88,6 +113,30 @@ class _PlayScreenState extends State<PlayScreen> {
                     fit: BoxFit.cover,
                   ),
           ),
+          if (isMapVisible)
+            Positioned(
+              bottom: 0,
+              left: 0,
+              right: 0,
+              height: MediaQuery.of(context).size.height / 2,
+              child: GestureDetector(
+                onVerticalDragDown: (_) {},
+                child: Container(
+                  color: Colors.white,
+                  child: Column(
+                    children: [
+                      IconButton(
+                        icon: Icon(Icons.keyboard_arrow_down),
+                        onPressed: closeMapAndMoveToNextPhoto,
+                      ),
+                      Expanded(
+                        child: MapScreen(),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
           Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -104,9 +153,18 @@ class _PlayScreenState extends State<PlayScreen> {
                             alignment: Alignment.bottomRight,
                             child: Padding(
                               padding: const EdgeInsets.all(16.0),
-                              child: ElevatedButton(
-                                onPressed: onNextPressed,
-                                child: Text("Submit"),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                children: [
+                                  ElevatedButton(
+                                    onPressed: onGuessPressed,
+                                    child: Text("Guess"),
+                                  ),
+                                  ElevatedButton(
+                                    onPressed: closeMapAndMoveToNextPhoto,
+                                    child: Text("Submit"),
+                                  ),
+                                ],
                               ),
                             ),
                           ),
