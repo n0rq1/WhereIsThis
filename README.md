@@ -5,7 +5,7 @@
 [![Stargazers](https://img.shields.io/github/stars/AustinNorquist/WhereIsThis.svg)](https://github.com/AustinNorquist/WhereIsThis/stargazers)
 [![Issues](https://img.shields.io/github/issues/AustinNorquist/WhereIsThis.svg)](https://github.com/AustinNorquist/WhereIsThis/issues)
 [![MIT License](https://img.shields.io/github/license/AustinNorquist/WhereIsThis.svg)](https://opensource.org/licenses/MIT)
-[![LinkedIn](https://img.shields.io/badge/austin-norquist.svg)](https://www.linkedin.com/in/austin-norquist/)
+[![LinkedIn](https://img.shields.io/badge/Austin-norquist.svg)](https://www.linkedin.com/in/Austin-Norquist/)
 
 
 
@@ -15,13 +15,16 @@
   <h3 align="center">WhereIsThis</h3>
 </div>
 
-![Screenshot_1701370756](https://github.com/AustinNorquist/WhereIsThis/assets/89611484/8e69c830-f267-43c9-b344-6a154b8b0eb4)
+<p align="center">
+  <img src="https://github.com/AustinNorquist/WhereIsThis/assets/89611484/3a8aaa2f-5f95-45c0-99c3-1b5b5ccc76d4" alt="Screenshot" width="300">
+</p>
 
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
 * Allows users to upload their own photos, so others can guess where they are.
 * Users can play by guessing where 5 photos were taken, and get a score based on how close the guess is.
+* Users can track their top 5 scores with the highscore screen.
 
 ### Built With
 

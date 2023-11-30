@@ -28,6 +28,14 @@ class _PlayScreenState extends State<PlayScreen> with SingleTickerProviderStateM
   GeoPoint markerLocation = GeoPoint(0, 0);
   late AnimationController _animationController;
 
+  final ButtonStyle style = ElevatedButton.styleFrom(
+    textStyle: const TextStyle(fontSize: 20),
+    backgroundColor: Colors.blue[800],
+    side: BorderSide(width: 2, color: Colors.blue),
+    fixedSize: Size(140, 35),
+    shadowColor: Colors.black,
+  );
+
   @override
   void initState() {
     super.initState();
@@ -179,6 +187,7 @@ class _PlayScreenState extends State<PlayScreen> with SingleTickerProviderStateM
                                       );
                                     },
                                     child: Text("Guess"),
+                                    style:style,
                                   ),
                                 ],
                               ),
