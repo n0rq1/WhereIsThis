@@ -15,7 +15,7 @@
   <h3 align="center">WhereIsThis</h3>
 </div>
 
-![Screenshot_1701370756](https://github.com/AustinNorquist/WhereIsThis/assets/89611484/a3e22bc2-3bf9-4391-a315-5c0410c42be6)
+![Screenshot_1701370756](https://github.com/AustinNorquist/WhereIsThis/assets/89611484/8e69c830-f267-43c9-b344-6a154b8b0eb4)
 
 <!-- ABOUT THE PROJECT -->
 ## About The Project
