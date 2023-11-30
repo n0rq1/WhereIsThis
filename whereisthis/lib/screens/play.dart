@@ -6,6 +6,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'dart:async';
 
+int currIndex = 0;
+int totalScore = 0;
+int MAXSCORE = 5000;
+
 class PlayScreen extends StatefulWidget {
   @override
   _PlayScreenState createState() => _PlayScreenState();
@@ -16,9 +20,8 @@ class _PlayScreenState extends State<PlayScreen> with SingleTickerProviderStateM
   late Map<String, GeoPoint> photoLocations;
   int currentIndex = 0;
   bool isLoading = true;
-
+  GeoPoint markerLocation = GeoPoint(0, 0);
   late AnimationController _animationController;
-  bool isMapVisible = false;
 
   @override
   void initState() {
@@ -78,19 +81,9 @@ class _PlayScreenState extends State<PlayScreen> with SingleTickerProviderStateM
     });
   }
 
-  void onGuessPressed() {
-    setState(() {
-      isMapVisible = true;
-      _animationController.forward();
-    });
-  }
-
-  void closeMapAndMoveToNextPhoto() {
-    setState(() {
-      isMapVisible = false;
-      _animationController.reverse();
-      onNextPressed();
-    });
+  void onMapSubmit() {
+    print(markerLocation);
+    onNextPressed();
   }
 
   @override
@@ -113,30 +106,6 @@ class _PlayScreenState extends State<PlayScreen> with SingleTickerProviderStateM
                     fit: BoxFit.cover,
                   ),
           ),
-          if (isMapVisible)
-            Positioned(
-              bottom: 0,
-              left: 0,
-              right: 0,
-              height: MediaQuery.of(context).size.height / 2,
-              child: GestureDetector(
-                onVerticalDragDown: (_) {},
-                child: Container(
-                  color: Colors.white,
-                  child: Column(
-                    children: [
-                      IconButton(
-                        icon: Icon(Icons.keyboard_arrow_down),
-                        onPressed: closeMapAndMoveToNextPhoto,
-                      ),
-                      Expanded(
-                        child: MapScreen(),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
           Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -157,12 +126,17 @@ class _PlayScreenState extends State<PlayScreen> with SingleTickerProviderStateM
                                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                                 children: [
                                   ElevatedButton(
-                                    onPressed: onGuessPressed,
+                                    onPressed: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => MapScreen(
+                                            onSubmit: onMapSubmit,
+                                          ),
+                                        ),
+                                      );
+                                    },
                                     child: Text("Guess"),
-                                  ),
-                                  ElevatedButton(
-                                    onPressed: closeMapAndMoveToNextPhoto,
-                                    child: Text("Submit"),
                                   ),
                                 ],
                               ),
@@ -183,5 +157,104 @@ class _PlayScreenState extends State<PlayScreen> with SingleTickerProviderStateM
         ],
       ),
     );
+  }
+}
+
+class MapScreen extends StatefulWidget {
+  final VoidCallback onSubmit;
+
+  MapScreen({required this.onSubmit});
+
+  @override
+  _MapScreenState createState() => _MapScreenState();
+}
+
+class _MapScreenState extends State<MapScreen> {
+  LatLng? tappedLocation;
+  Set<Marker> _markers = {};
+  GoogleMapController? _mapController;
+  int latitudeDiff = 0;
+  int longitudeDiff = 0;
+  int totalDiff = 0;
+
+  void calculateScore(){
+
+    /*
+    latitudeDiff = photoLatitude - tappedLocation.latitude;
+    longitudeDiff = photoLongitude - tappedLocation.longitude;
+    totalDiff = latitudeDiff + longitudeDiff;
+    totalScore = 5000;
+    */
+  }
+
+  void onNextPressed() {
+    setState(() {
+      if (currIndex < 4) {
+        currIndex++;
+        widget.onSubmit();
+        Navigator.pop(context);
+      } else {
+        currIndex = 0;
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => DoneScreen()),
+        );
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
+        title: Text('Map Screen'),
+      ),
+      body: Column(
+        children: <Widget>[
+          Expanded(
+            child: GoogleMap(
+              onMapCreated: (controller) {
+                setState(() {
+                  _mapController = controller;
+                });
+              },
+              initialCameraPosition: const CameraPosition(
+                target: LatLng(39.727551164068764, -121.84759163416642),
+                zoom: 14.0,
+              ),
+              markers: _markers,
+              onTap: (LatLng location) {
+                _addMarker(location);
+              },
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              onNextPressed();
+            },
+            child: Text('Submit'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _addMarker(LatLng location) {
+    final marker = Marker(
+      markerId: MarkerId(location.toString()),
+      position: location,
+    );
+
+    setState(() {
+      _markers.clear();
+      _markers.add(marker);
+      tappedLocation = location;
+    });
   }
 }
