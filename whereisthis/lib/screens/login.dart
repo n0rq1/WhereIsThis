@@ -38,13 +38,9 @@ class LoginScreen extends StatelessWidget {
           onPressed: () async {
             User? user = await _handleSignIn();
             if (user != null) {
-              // User signed in successfully
               print('User signed in: ${user.displayName}');
-              // You can navigate to another screen or perform further actions here
             } else {
-              // Error during sign-in
               print('Error signing in');
-              // You can display an error message or handle the error as needed
             }
           },
           child: Text('Sign in with Google'),

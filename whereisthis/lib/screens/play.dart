@@ -5,10 +5,15 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'dart:async';
+import 'dart:math';
 
+
+List<double> photoLatitudes = [];
+List<double> photoLongitudes = [];
 int currIndex = 0;
-int totalScore = 0;
+double totalScore = 0;
 int MAXSCORE = 5000;
+LatLng? tappedLocation;
 
 class PlayScreen extends StatefulWidget {
   @override
@@ -30,6 +35,9 @@ class _PlayScreenState extends State<PlayScreen> with SingleTickerProviderStateM
       vsync: this,
       duration: Duration(milliseconds: 500),
     );
+    currentIndex = 0;
+    totalScore = 0;
+    currIndex = 0;
     photoUrls = [];
     photoLocations = {};
     fetchRandomPhotosAndLocations();
@@ -53,9 +61,17 @@ class _PlayScreenState extends State<PlayScreen> with SingleTickerProviderStateM
       }
 
       photoUrls = selectedIndices.map((index) => allUrls[index]).toList();
-      photoLocations = Map.fromEntries(photoUrls.map((url) =>
-          MapEntry(url,
-              allLocations.containsKey(url) ? allLocations[url]! : GeoPoint(0, 0))));
+
+      photoLatitudes = selectedIndices
+        .map((index) => allLocations[allUrls[index]]?.latitude ?? 0)
+        .toList();
+      
+      photoLongitudes = selectedIndices
+        .map((index) => allLocations[allUrls[index]]?.longitude ?? 0)
+        .toList();
+
+      print(photoLatitudes);
+      print(photoLongitudes);
 
       setState(() {
         isLoading = false;
@@ -81,8 +97,34 @@ class _PlayScreenState extends State<PlayScreen> with SingleTickerProviderStateM
     });
   }
 
+  double dp(double val, int places){ 
+    num mod = pow(10.0, places); 
+    return ((val * mod).round().toDouble() / mod); 
+  }
+
+  void calculateScore() {
+    double photoLatitude = photoLatitudes[currentIndex];
+    double photoLongitude = photoLongitudes[currentIndex];
+    double latitudeDiff = pow((photoLatitude - tappedLocation!.latitude).abs(), 2).toDouble();
+    double longitudeDiff = pow((photoLongitude - tappedLocation!.longitude).abs(), 2).toDouble();
+    double currDiff = sqrt(latitudeDiff + longitudeDiff);
+
+    currDiff = 100 - (10*(currDiff * 1000));
+    if(currDiff < 0){
+      currDiff = 0;
+    }
+
+    totalScore = (totalScore + currDiff);
+
+    totalScore = dp(totalScore,2);
+    print("lat: $photoLatitude");
+    print("long: $photoLongitude");
+    print("diff: $currDiff");
+    print("total: $totalScore");
+  }
+
   void onMapSubmit() {
-    print(markerLocation);
+    calculateScore();
     onNextPressed();
   }
 
@@ -170,22 +212,8 @@ class MapScreen extends StatefulWidget {
 }
 
 class _MapScreenState extends State<MapScreen> {
-  LatLng? tappedLocation;
   Set<Marker> _markers = {};
   GoogleMapController? _mapController;
-  int latitudeDiff = 0;
-  int longitudeDiff = 0;
-  int totalDiff = 0;
-
-  void calculateScore(){
-
-    /*
-    latitudeDiff = photoLatitude - tappedLocation.latitude;
-    longitudeDiff = photoLongitude - tappedLocation.longitude;
-    totalDiff = latitudeDiff + longitudeDiff;
-    totalScore = 5000;
-    */
-  }
 
   void onNextPressed() {
     setState(() {
@@ -226,7 +254,7 @@ class _MapScreenState extends State<MapScreen> {
               },
               initialCameraPosition: const CameraPosition(
                 target: LatLng(39.727551164068764, -121.84759163416642),
-                zoom: 14.0,
+                zoom: 16.0,
               ),
               markers: _markers,
               onTap: (LatLng location) {
@@ -257,4 +285,8 @@ class _MapScreenState extends State<MapScreen> {
       tappedLocation = location;
     });
   }
+}
+
+double getScore(){
+  return totalScore;
 }
