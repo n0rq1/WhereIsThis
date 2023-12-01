@@ -223,11 +223,6 @@ class _PlayScreenState extends State<PlayScreen>
                       ],
                     ),
                   ),
-                if (photoUrls.isEmpty)
-                  Text(
-                    'No photos available',
-                    style: TextStyle(color: Colors.white),
-                  ),
               ],
             ),
           ),
