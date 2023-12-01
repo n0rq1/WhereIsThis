@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'screens/addphotos.dart';
 import 'screens/play.dart';
-import 'screens/settings.dart';
+import 'screens/highscores.dart';
 import 'screens/login.dart';
 import 'firebase_options.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -119,7 +119,7 @@ class HomeScreen extends StatelessWidget {
                           onPressed: () {
                             Navigator.push(
                               context,
-                              MaterialPageRoute(builder: (context) => SettingsScreen()),
+                              MaterialPageRoute(builder: (context) => HighscoresScreen()),
                             );
                           },
                           child: Text("Highscores"),
