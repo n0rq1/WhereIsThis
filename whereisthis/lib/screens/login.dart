@@ -6,7 +6,7 @@ class LoginScreen extends StatelessWidget {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final GoogleSignIn _googleSignIn = GoogleSignIn();
 
-  Future<User?> _handleSignIn() async {
+  Future<void> _handleSignIn(BuildContext context) async {
     try {
       GoogleSignInAccount? googleSignInAccount = await _googleSignIn.signIn();
       GoogleSignInAuthentication googleSignInAuthentication =
@@ -20,10 +20,16 @@ class LoginScreen extends StatelessWidget {
       UserCredential authResult = await _auth.signInWithCredential(credential);
       User? user = authResult.user;
 
-      return user;
+      print(user!.uid);
+
+      if (user != null) {
+        print('User signed in: ${user.displayName}');
+        Navigator.pop(context);
+      } else {
+        print('Error signing in');
+      }
     } catch (error) {
       print(error);
-      return null;
     }
   }
 
@@ -36,12 +42,7 @@ class LoginScreen extends StatelessWidget {
       body: Center(
         child: ElevatedButton(
           onPressed: () async {
-            User? user = await _handleSignIn();
-            if (user != null) {
-              print('User signed in: ${user.displayName}');
-            } else {
-              print('Error signing in');
-            }
+            await _handleSignIn(context);
           },
           child: Text('Sign in with Google'),
         ),

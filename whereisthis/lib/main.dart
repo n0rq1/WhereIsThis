@@ -122,7 +122,7 @@ class HomeScreen extends StatelessWidget {
                               MaterialPageRoute(builder: (context) => SettingsScreen()),
                             );
                           },
-                          child: Text("Settings"),
+                          child: Text("Highscores"),
                           style: style,
                         ),
                         SizedBox(width: 10),

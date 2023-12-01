@@ -10,18 +10,13 @@ import 'package:image_picker/image_picker.dart';
 import 'package:uuid/uuid.dart';
 import 'myphotos.dart';
 
-import 'package:firebase_core/firebase_core.dart';
-import '../firebase_options.dart';
-
 class AddPhotosScreen extends StatefulWidget {
   const AddPhotosScreen({super.key});
-
   @override
   State<AddPhotosScreen> createState() => _AddPhotosScreenState();
 }
 
 class _AddPhotosScreenState extends State<AddPhotosScreen> {
-  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   bool buttonWorks = true;
   String displayString = "";
   late Future<Position> _futurePosition;
@@ -30,6 +25,14 @@ class _AddPhotosScreenState extends State<AddPhotosScreen> {
   File? imageFile;
   String url = "";
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
+
+  final ButtonStyle style = ElevatedButton.styleFrom(
+    textStyle: const TextStyle(fontSize: 20),
+    backgroundColor: Colors.blue[800],
+    side: BorderSide(width: 2, color: Colors.blue),
+    fixedSize: Size(140, 35),
+    shadowColor: Colors.black,
+  );
 
   Future<Position> _determinePosition() async {
     bool serviceEnabled;
@@ -48,16 +51,15 @@ class _AddPhotosScreenState extends State<AddPhotosScreen> {
       }
     }
 
-    if (permission == LocationPermission.deniedForever) {
+    if(permission == LocationPermission.deniedForever){
       return Future.error(
           'Location permissions are permanently denied, we cannot request permissions.');
     }
-
     return await Geolocator.getCurrentPosition();
   }
 
   @override
-  void initState() {
+  void initState(){
     super.initState();
     _futurePosition = _determinePosition();
     const LocationSettings locationSettings = LocationSettings(
@@ -89,27 +91,27 @@ class _AddPhotosScreenState extends State<AddPhotosScreen> {
 
     FirebaseAuth auth = FirebaseAuth.instance;
 
-    if (auth.currentUser != null && imageFile != null) {
+    if(auth.currentUser != null && imageFile != null){
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Processing Data')),
       );
 
-      try {
+      try{
         String photoUrl = await uploadFile(Uuid().v1());
         DocumentSnapshot userDocument = await FirebaseFirestore.instance
             .collection('communityPhotos')
             .doc('commPhotosId')
             .get();
 
-        List<String> currentUrls =
-          List<String>.from(userDocument['url'] ?? []);
+        List<String> currentUrls = List<String>.from(userDocument['url'] ?? []);
 
-        Map<String,GeoPoint> locationsMap = 
-          Map<String,GeoPoint>.from(userDocument['locations'] ?? [] );
+        Map<String, GeoPoint> locationsMap =
+            Map<String, GeoPoint>.from(userDocument['locations'] ?? []);
 
         currentUrls.insert(0, photoUrl);
 
-        locationsMap[photoUrl] = GeoPoint(position!.latitude,position!.longitude);
+        locationsMap[photoUrl] =
+            GeoPoint(position!.latitude, position!.longitude);
 
         final docRef =
             firestore.collection('communityPhotos').doc('commPhotosId');
@@ -125,23 +127,24 @@ class _AddPhotosScreenState extends State<AddPhotosScreen> {
             .doc('photosId')
             .get();
 
-        List<String> userUrls =
-            List<String>.from(userP['url'] ?? []);
+        List<String> userUrls = List<String>.from(userP['url'] ?? []);
         List<GeoPoint> userLocations =
             List<GeoPoint>.from(userP['location'] ?? []);
 
         userUrls.insert(0, photoUrl);
-        userLocations.insert(0, GeoPoint(position!.latitude, position!.longitude));
+        userLocations.insert(
+            0, GeoPoint(position!.latitude, position!.longitude));
 
-        final test = 
-        firestore.collection('userPhotos').doc(auth.currentUser!.uid).collection('photos').doc('photosId');
+        final test = firestore
+            .collection('userPhotos')
+            .doc(auth.currentUser!.uid)
+            .collection('photos')
+            .doc('photosId');
         await test.set({
           'url': userUrls,
           'location': userLocations,
         });
-
         print('Success.');
-
         Future.delayed(const Duration(seconds: 1), () {
           setState(() {
             imageFile = null;
@@ -151,18 +154,16 @@ class _AddPhotosScreenState extends State<AddPhotosScreen> {
         print('$e');
       }
     } else {
-      if (imageFile == null) {
+      if(imageFile == null){
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Please take a photo before submitting')),
+          const SnackBar(
+              content: Text('Take a photo to submit')),
         );
-      } else {
-        print('User not signed in');
       }
     }
   }
 
-
-  Future<String> uploadFile(String filename) async {
+  Future<String> uploadFile(String filename) async{
     Reference ref = FirebaseStorage.instance.ref().child('$filename.jpg');
     final SettableMetadata metadata = SettableMetadata(
       contentType: 'image/jpeg',
@@ -172,13 +173,13 @@ class _AddPhotosScreenState extends State<AddPhotosScreen> {
     UploadTask uploadTask = ref.putFile(imageFile!, metadata);
     TaskSnapshot taskSnapshot = await uploadTask;
     String downloadURL = await taskSnapshot.ref.getDownloadURL();
-    if (kDebugMode) {
+    if(kDebugMode){
       print(downloadURL);
     }
     return downloadURL;
   }
 
-  void _navigateToMyPhotos() {
+  void _navigateToMyPhotos(){
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => MyPhotosScreen()),
@@ -186,23 +187,25 @@ class _AddPhotosScreenState extends State<AddPhotosScreen> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context){
     return Scaffold(
       appBar: AppBar(
-        // title: Text("Add a Photo"),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
       ),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            if (imageFile != null) // Show "Submit" button only if a photo is taken
+            if (imageFile != null)
               ElevatedButton(
                 onPressed: buttonWorks ? _submit : null,
                 child: const Icon(Icons.cloud_upload),
               ),
             ElevatedButton(
-              onPressed: _navigateToMyPhotos, // Redirect to MyPhotos screen
+              onPressed: _navigateToMyPhotos,
               child: const Text("My Photos"),
+              style: style,
             ),
             Text(displayString),
           ],
@@ -213,6 +216,7 @@ class _AddPhotosScreenState extends State<AddPhotosScreen> {
         tooltip: 'Get Photo',
         child: const Icon(Icons.add_a_photo),
       ),
+      backgroundColor: Colors.grey[900],
     );
   }
 }

@@ -1,38 +1,41 @@
-import '../main.dart';
 import 'postgame.dart';
 import 'map.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'dart:async';
 import 'dart:math';
-
 
 List<double> photoLatitudes = [];
 List<double> photoLongitudes = [];
 int currIndex = 0;
 double totalScore = 0;
-int MAXSCORE = 5000;
 LatLng? tappedLocation;
+
+double dp(double val, int places) {
+  num mod = pow(10.0, places);
+  return ((val * mod).round().toDouble() / mod);
+}
 
 class PlayScreen extends StatefulWidget {
   @override
   _PlayScreenState createState() => _PlayScreenState();
 }
 
-class _PlayScreenState extends State<PlayScreen> with SingleTickerProviderStateMixin {
+class _PlayScreenState extends State<PlayScreen>
+    with SingleTickerProviderStateMixin {
   late List<String> photoUrls;
   late Map<String, GeoPoint> photoLocations;
-  int currentIndex = 0;
   bool isLoading = true;
-  GeoPoint markerLocation = GeoPoint(0, 0);
+  GeoPoint markerLocation = const GeoPoint(0, 0);
   late AnimationController _animationController;
 
   final ButtonStyle style = ElevatedButton.styleFrom(
     textStyle: const TextStyle(fontSize: 20),
     backgroundColor: Colors.blue[800],
-    side: BorderSide(width: 2, color: Colors.blue),
-    fixedSize: Size(140, 35),
+    side: const BorderSide(width: 2, color: Colors.blue),
+    fixedSize: const Size(140, 35),
     shadowColor: Colors.black,
   );
 
@@ -41,14 +44,18 @@ class _PlayScreenState extends State<PlayScreen> with SingleTickerProviderStateM
     super.initState();
     _animationController = AnimationController(
       vsync: this,
-      duration: Duration(milliseconds: 500),
+      duration: const Duration(milliseconds: 500),
     );
-    currentIndex = 0;
+    resetGame();
+    fetchRandomPhotosAndLocations();
+  }
+
+  void resetGame() {
+    currIndex = 0;
     totalScore = 0;
     currIndex = 0;
     photoUrls = [];
     photoLocations = {};
-    fetchRandomPhotosAndLocations();
   }
 
   Future<void> fetchRandomPhotosAndLocations() async {
@@ -71,15 +78,15 @@ class _PlayScreenState extends State<PlayScreen> with SingleTickerProviderStateM
       photoUrls = selectedIndices.map((index) => allUrls[index]).toList();
 
       photoLatitudes = selectedIndices
-        .map((index) => allLocations[allUrls[index]]?.latitude ?? 0)
-        .toList();
-      
-      photoLongitudes = selectedIndices
-        .map((index) => allLocations[allUrls[index]]?.longitude ?? 0)
-        .toList();
+          .map((index) => allLocations[allUrls[index]]?.latitude ?? 0)
+          .toList();
 
-      print(photoLatitudes);
-      print(photoLongitudes);
+      photoLongitudes = selectedIndices
+          .map((index) => allLocations[allUrls[index]]?.longitude ?? 0)
+          .toList();
+
+      //print(photoLatitudes);
+      //print(photoLongitudes);
 
       setState(() {
         isLoading = false;
@@ -94,37 +101,36 @@ class _PlayScreenState extends State<PlayScreen> with SingleTickerProviderStateM
 
   void onNextPressed() {
     setState(() {
-      if (photoUrls.isNotEmpty && currentIndex < photoUrls.length - 1) {
-        currentIndex++;
-      } else {
+      if (photoUrls.isNotEmpty && currIndex < photoUrls.length - 1) {
+        currIndex++;
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => DoneScreen()),
+          MaterialPageRoute(
+            builder: (context) =>
+                DoneScreen(),
+          ),
         );
       }
     });
   }
 
-  double dp(double val, int places){ 
-    num mod = pow(10.0, places); 
-    return ((val * mod).round().toDouble() / mod); 
-  }
-
   void calculateScore() {
-    double photoLatitude = photoLatitudes[currentIndex];
-    double photoLongitude = photoLongitudes[currentIndex];
-    double latitudeDiff = pow((photoLatitude - tappedLocation!.latitude).abs(), 2).toDouble();
-    double longitudeDiff = pow((photoLongitude - tappedLocation!.longitude).abs(), 2).toDouble();
+    double photoLatitude = photoLatitudes[currIndex];
+    double photoLongitude = photoLongitudes[currIndex];
+    double latitudeDiff =
+        pow((photoLatitude - tappedLocation!.latitude).abs(), 2).toDouble();
+    double longitudeDiff =
+        pow((photoLongitude - tappedLocation!.longitude).abs(), 2).toDouble();
     double currDiff = sqrt(latitudeDiff + longitudeDiff);
 
-    currDiff = 100 - (10*(currDiff * 1000));
-    if(currDiff < 0){
+    currDiff = 100 - (10 * (currDiff * 1000));
+    if (currDiff < 0) {
       currDiff = 0;
     }
 
     totalScore = (totalScore + currDiff);
 
-    totalScore = dp(totalScore,2);
+    totalScore = dp(totalScore, 2);
     print("lat: $photoLatitude");
     print("long: $photoLongitude");
     print("diff: $currDiff");
@@ -144,6 +150,7 @@ class _PlayScreenState extends State<PlayScreen> with SingleTickerProviderStateM
         backgroundColor: Colors.transparent,
         elevation: 0,
       ),
+      backgroundColor: Colors.grey[900],
       body: Stack(
         children: [
           Positioned.fill(
@@ -152,7 +159,7 @@ class _PlayScreenState extends State<PlayScreen> with SingleTickerProviderStateM
                     child: CircularProgressIndicator(),
                   )
                 : Image.network(
-                    photoUrls.isNotEmpty ? photoUrls[currentIndex] : '',
+                    photoUrls.isNotEmpty ? photoUrls[currIndex] : '',
                     fit: BoxFit.cover,
                   ),
           ),
@@ -166,6 +173,24 @@ class _PlayScreenState extends State<PlayScreen> with SingleTickerProviderStateM
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
+                        Positioned(
+                          right: 16.0,
+                          top: 60.0,
+                          child: Container(
+                            padding: EdgeInsets.all(8.0),
+                            decoration: BoxDecoration(
+                              color: Colors.blue[800],
+                              borderRadius: BorderRadius.circular(8.0),
+                            ),
+                            child: Text(
+                              'Score: ${totalScore.toString()}',
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 24.0,
+                                  fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                        ),
                         SizedBox(height: 20),
                         Expanded(
                           child: Align(
@@ -173,7 +198,8 @@ class _PlayScreenState extends State<PlayScreen> with SingleTickerProviderStateM
                             child: Padding(
                               padding: const EdgeInsets.all(16.0),
                               child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceAround,
                                 children: [
                                   ElevatedButton(
                                     onPressed: () {
@@ -187,7 +213,7 @@ class _PlayScreenState extends State<PlayScreen> with SingleTickerProviderStateM
                                       );
                                     },
                                     child: Text("Guess"),
-                                    style:style,
+                                    style: style,
                                   ),
                                 ],
                               ),
@@ -227,11 +253,28 @@ class _MapScreenState extends State<MapScreen> {
   void onNextPressed() {
     setState(() {
       if (currIndex < 4) {
-        currIndex++;
+        //currIndex++;
         widget.onSubmit();
         Navigator.pop(context);
       } else {
+        double photoLatitude = photoLatitudes[currIndex];
+        double photoLongitude = photoLongitudes[currIndex];
+        double latitudeDiff =
+            pow((photoLatitude - tappedLocation!.latitude).abs(), 2).toDouble();
+        double longitudeDiff =
+            pow((photoLongitude - tappedLocation!.longitude).abs(), 2)
+                .toDouble();
+        double currDiff = sqrt(latitudeDiff + longitudeDiff);
+
         currIndex = 0;
+        currDiff = 100 - (10 * (currDiff * 1000));
+        if (currDiff < 0) {
+          currDiff = 0;
+        }
+
+        totalScore = (totalScore + currDiff);
+
+        totalScore = dp(totalScore, 2);
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => DoneScreen()),
@@ -250,7 +293,9 @@ class _MapScreenState extends State<MapScreen> {
             Navigator.pop(context);
           },
         ),
-        title: Text('Map Screen'),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        iconTheme: IconThemeData(color: Colors.black),
       ),
       body: Column(
         children: <Widget>[
@@ -294,8 +339,4 @@ class _MapScreenState extends State<MapScreen> {
       tappedLocation = location;
     });
   }
-}
-
-double getScore(){
-  return totalScore;
 }
