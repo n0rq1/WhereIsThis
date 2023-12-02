@@ -16,7 +16,9 @@
 </div>
 
 <p align="center">
-  <img src="https://github.com/AustinNorquist/WhereIsThis/assets/89611484/3a8aaa2f-5f95-45c0-99c3-1b5b5ccc76d4" alt="Screenshot" width="300">
+  <img src="https://github.com/AustinNorquist/WhereIsThis/assets/89611484/70b028a2-f785-4969-b5a5-ed7ccfd1f183" alt="Screenshot" width="300">
+  <img src="https://github.com/AustinNorquist/WhereIsThis/assets/89611484/5a88e5ae-f858-43f6-ab0c-ac55ecad8326" alt="Screenshot" width="300">
+  <img src="https://github.com/AustinNorquist/WhereIsThis/assets/89611484/b042de72-9055-4097-9a04-91d82894030c" alt="Screenshot" width="300">
 </p>
 
 <!-- ABOUT THE PROJECT -->

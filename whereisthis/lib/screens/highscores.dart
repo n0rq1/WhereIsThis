@@ -7,7 +7,7 @@ class HighscoresScreen extends StatefulWidget {
   _HighscoresScreenState createState() => _HighscoresScreenState();
 }
 
-List<double> highscores = [0];
+List<double> highscores = List.filled(10, 0);
 
 class _HighscoresScreenState extends State<HighscoresScreen> {
   @override
@@ -16,7 +16,7 @@ class _HighscoresScreenState extends State<HighscoresScreen> {
     getHighscoreList();
   }
 
-  Future<void> getHighscoreList() async {
+  Future<void> getHighscoreList() async{
     final FirebaseAuth auth = FirebaseAuth.instance;
     final User? user = auth.currentUser;
     if (user == null) {
@@ -142,7 +142,7 @@ class _HighscoresScreenState extends State<HighscoresScreen> {
           actions: [
             TextButton(
               onPressed: () {
-                Navigator.of(context).pop(); // Close the dialog
+                Navigator.of(context).pop();
               },
               child: Text("Cancel"),
             ),
