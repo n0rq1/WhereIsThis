@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class LoginScreen extends StatelessWidget {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -8,9 +9,19 @@ class LoginScreen extends StatelessWidget {
 
   Future<void> _handleSignIn(BuildContext context) async {
     try {
+      // Sign out of the current Google account
+      await _googleSignIn.signOut();
+
+      // Prompt the user to select a Google account
       GoogleSignInAccount? googleSignInAccount = await _googleSignIn.signIn();
+
+      if (googleSignInAccount == null) {
+        // The user canceled the sign-in process
+        return;
+      }
+
       GoogleSignInAuthentication googleSignInAuthentication =
-          await googleSignInAccount!.authentication;
+          await googleSignInAccount.authentication;
 
       AuthCredential credential = GoogleAuthProvider.credential(
         accessToken: googleSignInAuthentication.accessToken,
@@ -20,11 +31,22 @@ class LoginScreen extends StatelessWidget {
       UserCredential authResult = await _auth.signInWithCredential(credential);
       User? user = authResult.user;
 
-      print(user!.uid);
-
       if (user != null) {
-        print('User signed in: ${user.displayName}');
+        final uid = user.uid;
+        DocumentSnapshot userDocument = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(uid)
+            .get();
+
+        if (!userDocument.exists) {
+          await FirebaseFirestore.instance.collection('users').doc(uid).set({
+            'locations': {},
+            'urls': [],
+            'highscores': List.filled(10, 0),
+          });
+        }
         Navigator.pop(context);
+        
       } else {
         print('Error signing in');
       }

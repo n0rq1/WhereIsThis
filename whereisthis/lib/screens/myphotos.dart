@@ -1,25 +1,80 @@
-import 'dart:io';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_storage/firebase_storage.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:geolocator/geolocator.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:uuid/uuid.dart';
 
-import 'package:firebase_core/firebase_core.dart';
-import '../firebase_options.dart';
 
 class MyPhotosScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("My Photos"),
+        backgroundColor: Colors.grey[900],
+        elevation: 0,
+        iconTheme: IconThemeData(color: Colors.white),
       ),
-      //body: PhotoGrid(),
+      body: Container(
+        color: Colors.grey[900],
+        child: PhotoGrid(),
+      ),
+    );
+  }
+}
+
+class PhotoGrid extends StatelessWidget {
+  final FirebaseAuth auth = FirebaseAuth.instance;
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<DocumentSnapshot>(
+      future: FirebaseFirestore.instance
+          .collection('users')
+          .doc(auth.currentUser!.uid)
+          .get(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Center(
+            child: CircularProgressIndicator(),
+          );
+        }
+
+        if (!snapshot.hasData ||
+            snapshot.data == null ||
+            snapshot.data!['urls'] == null) {
+          return Center(
+            child: Text('No photos available',
+                style: TextStyle(color: Colors.white)),
+          );
+        }
+
+        List<String> allUrls = List<String>.from(snapshot.data!['urls'] ?? []);
+
+        return Container(
+          color: Colors.grey[900],
+          child: ListView(
+            children: [
+              GridView.builder(
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 3,
+                  crossAxisSpacing: 8.0,
+                  mainAxisSpacing: 8.0,
+                ),
+                itemCount: allUrls.length,
+                shrinkWrap: true,
+                physics: NeverScrollableScrollPhysics(),
+                itemBuilder: (context, index) {
+                  var photoUrl = allUrls[index];
+                  return GridTile(
+                    child: Image.network(
+                      photoUrl,
+                      fit: BoxFit.cover,
+                    ),
+                  );
+                },
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }

@@ -64,7 +64,7 @@ class _PlayScreenState extends State<PlayScreen>
           .doc('commPhotosId')
           .get();
 
-      List<String> allUrls = List<String>.from(userDocument['url'] ?? []);
+      List<String> allUrls = List<String>.from(userDocument['urls'] ?? []);
       Map<String, GeoPoint> allLocations =
           Map<String, GeoPoint>.from(userDocument['locations'] ?? {});
 

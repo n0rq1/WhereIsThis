@@ -51,7 +51,7 @@ class _AddPhotosScreenState extends State<AddPhotosScreen> {
       }
     }
 
-    if(permission == LocationPermission.deniedForever){
+    if (permission == LocationPermission.deniedForever) {
       return Future.error(
           'Location permissions are permanently denied, we cannot request permissions.');
     }
@@ -59,7 +59,7 @@ class _AddPhotosScreenState extends State<AddPhotosScreen> {
   }
 
   @override
-  void initState(){
+  void initState() {
     super.initState();
     _futurePosition = _determinePosition();
     const LocationSettings locationSettings = LocationSettings(
@@ -91,60 +91,80 @@ class _AddPhotosScreenState extends State<AddPhotosScreen> {
 
     FirebaseAuth auth = FirebaseAuth.instance;
 
-    if(auth.currentUser != null && imageFile != null){
+    if (auth.currentUser != null && imageFile != null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Processing Data')),
+        SnackBar(
+          content: Text(
+            'Processing Data',
+            style: TextStyle(color: Colors.white),
+          ),
+        ),
       );
-
-      try{
+      try {
         String photoUrl = await uploadFile(Uuid().v1());
-        DocumentSnapshot userDocument = await FirebaseFirestore.instance
+
+        final FirebaseAuth auth = FirebaseAuth.instance;
+        final User? user = auth.currentUser;
+        if (user == null) {
+          return;
+        }
+
+        final uid = user.uid;
+
+        //get community photos/locations
+        DocumentSnapshot commDocument = await FirebaseFirestore.instance
             .collection('communityPhotos')
             .doc('commPhotosId')
             .get();
 
-        List<String> currentUrls = List<String>.from(userDocument['url'] ?? []);
+        //community photo urls
+        List<String> commUrls = List<String>.from(commDocument['urls'] ?? []);
 
-        Map<String, GeoPoint> locationsMap =
-            Map<String, GeoPoint>.from(userDocument['locations'] ?? []);
+        //community photo geopoints
+        Map<String, GeoPoint> commLocations =
+            Map<String, GeoPoint>.from(commDocument['locations'] ?? []);
 
-        currentUrls.insert(0, photoUrl);
+        //add current photoUrl to the top of the commUrls
+        commUrls.insert(0, photoUrl);
 
-        locationsMap[photoUrl] =
+        //add currentPhotoUrl location to the top of the commLocations
+        commLocations[photoUrl] =
             GeoPoint(position!.latitude, position!.longitude);
 
-        final docRef =
-            firestore.collection('communityPhotos').doc('commPhotosId');
-        await docRef.set({
-          'locations': locationsMap,
-          'url': currentUrls,
-        });
-
-        DocumentSnapshot userP = await FirebaseFirestore.instance
-            .collection('userPhotos')
-            .doc(auth.currentUser!.uid)
-            .collection('photos')
-            .doc('photosId')
+        //get user photos/locations
+        DocumentSnapshot userDocument = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(uid)
             .get();
 
-        List<String> userUrls = List<String>.from(userP['url'] ?? []);
-        List<GeoPoint> userLocations =
-            List<GeoPoint>.from(userP['location'] ?? []);
+        List<String> userUrls = List<String>.from(userDocument['urls'] ?? []);
+
+        Map<String, GeoPoint> userLocations =
+            Map<String, GeoPoint>.from(userDocument['locations'] ?? []);
 
         userUrls.insert(0, photoUrl);
-        userLocations.insert(
-            0, GeoPoint(position!.latitude, position!.longitude));
 
-        final test = firestore
-            .collection('userPhotos')
-            .doc(auth.currentUser!.uid)
-            .collection('photos')
-            .doc('photosId');
-        await test.set({
-          'url': userUrls,
-          'location': userLocations,
+        userLocations[photoUrl] =
+            GeoPoint(position!.latitude, position!.longitude);
+
+        //insert into comm photos
+        final docRefComm =
+            firestore.collection('communityPhotos').doc('commPhotosId');
+        await docRefComm.update({
+          'locations': commLocations,
+          'urls': commUrls,
         });
+
+        //insert into user photos
+        final docRefUser =
+            firestore.collection('users').doc(uid);
+        await docRefUser.update({
+          'locations': userLocations,
+          'urls': userUrls,
+        });
+
         print('Success.');
+
         Future.delayed(const Duration(seconds: 1), () {
           setState(() {
             imageFile = null;
@@ -154,16 +174,15 @@ class _AddPhotosScreenState extends State<AddPhotosScreen> {
         print('$e');
       }
     } else {
-      if(imageFile == null){
+      if (imageFile == null) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-              content: Text('Take a photo to submit')),
+          const SnackBar(content: Text('Take a photo to submit')),
         );
       }
     }
   }
 
-  Future<String> uploadFile(String filename) async{
+  Future<String> uploadFile(String filename) async {
     Reference ref = FirebaseStorage.instance.ref().child('$filename.jpg');
     final SettableMetadata metadata = SettableMetadata(
       contentType: 'image/jpeg',
@@ -173,13 +192,13 @@ class _AddPhotosScreenState extends State<AddPhotosScreen> {
     UploadTask uploadTask = ref.putFile(imageFile!, metadata);
     TaskSnapshot taskSnapshot = await uploadTask;
     String downloadURL = await taskSnapshot.ref.getDownloadURL();
-    if(kDebugMode){
+    if (kDebugMode) {
       print(downloadURL);
     }
     return downloadURL;
   }
 
-  void _navigateToMyPhotos(){
+  void _navigateToMyPhotos() {
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => MyPhotosScreen()),
@@ -187,7 +206,7 @@ class _AddPhotosScreenState extends State<AddPhotosScreen> {
   }
 
   @override
-  Widget build(BuildContext context){
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.transparent,
@@ -202,11 +221,13 @@ class _AddPhotosScreenState extends State<AddPhotosScreen> {
                 onPressed: buttonWorks ? _submit : null,
                 child: const Icon(Icons.cloud_upload),
               ),
+            SizedBox(height: 16),
             ElevatedButton(
               onPressed: _navigateToMyPhotos,
               child: const Text("My Photos"),
               style: style,
             ),
+            SizedBox(height: 16),
             Text(displayString),
           ],
         ),
