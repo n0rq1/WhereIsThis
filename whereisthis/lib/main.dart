@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'screens/addphotos.dart';
+import 'screens/photos.dart';
 import 'screens/play.dart';
 import 'screens/highscores.dart';
 import 'screens/login.dart';
@@ -72,14 +72,16 @@ class HomeScreen extends StatelessWidget {
                             onTap: () {
                               Navigator.push(
                                 context,
-                                MaterialPageRoute(builder: (context) => LoginScreen()),
+                                MaterialPageRoute(
+                                    builder: (context) => LoginScreen()),
                               );
                             },
                             child: ElevatedButton(
                               onPressed: () {
                                 Navigator.push(
                                   context,
-                                  MaterialPageRoute(builder: (context) => LoginScreen()),
+                                  MaterialPageRoute(
+                                      builder: (context) => LoginScreen()),
                                 );
                               },
                               child: Text("Login"),
@@ -100,7 +102,8 @@ class HomeScreen extends StatelessWidget {
                               await FirebaseAuth.instance.signOut();
                               Navigator.pushReplacement(
                                 context,
-                                MaterialPageRoute(builder: (context) => HomeScreen()),
+                                MaterialPageRoute(
+                                    builder: (context) => HomeScreen()),
                               );
                             },
                             child: Text("Logout"),
@@ -119,7 +122,8 @@ class HomeScreen extends StatelessWidget {
                           onPressed: () {
                             Navigator.push(
                               context,
-                              MaterialPageRoute(builder: (context) => HighscoresScreen()),
+                              MaterialPageRoute(
+                                  builder: (context) => HighscoresScreen()),
                             );
                           },
                           child: Text("Highscores"),
@@ -130,7 +134,8 @@ class HomeScreen extends StatelessWidget {
                           onPressed: () {
                             Navigator.push(
                               context,
-                              MaterialPageRoute(builder: (context) => PlayScreen()),
+                              MaterialPageRoute(
+                                  builder: (context) => PlayScreen()),
                             );
                           },
                           child: Text("Play"),
@@ -141,7 +146,8 @@ class HomeScreen extends StatelessWidget {
                           onPressed: () {
                             Navigator.push(
                               context,
-                              MaterialPageRoute(builder: (context) => AddPhotosScreen()),
+                              MaterialPageRoute(
+                                  builder: (context) => PhotosScreen()),
                             );
                           },
                           child: Text("Photos"),

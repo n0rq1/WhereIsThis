@@ -9,14 +9,11 @@ class LoginScreen extends StatelessWidget {
 
   Future<void> _handleSignIn(BuildContext context) async {
     try {
-      // Sign out of the current Google account
       await _googleSignIn.signOut();
 
-      // Prompt the user to select a Google account
       GoogleSignInAccount? googleSignInAccount = await _googleSignIn.signIn();
 
       if (googleSignInAccount == null) {
-        // The user canceled the sign-in process
         return;
       }
 

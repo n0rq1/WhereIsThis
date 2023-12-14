@@ -50,7 +50,6 @@ class _PlayScreenState extends State<PlayScreen>
   }
 
   void resetGame() {
-    currIndex = 0;
     totalScore = 0;
     currIndex = 0;
     photoUrls = [];
@@ -122,7 +121,7 @@ class _PlayScreenState extends State<PlayScreen>
         pow((photoLongitude - tappedLocation!.longitude).abs(), 2).toDouble();
     double currDiff = sqrt(latitudeDiff + longitudeDiff);
 
-    currDiff = 100 - (10 * (currDiff * 1000));
+    currDiff = 100 - (5 * (currDiff * 1000));
     if (currDiff < 0) {
       currDiff = 0;
     }
@@ -280,12 +279,14 @@ class _MapScreenState extends State<MapScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
         leading: IconButton(
           icon: Icon(Icons.arrow_back),
           onPressed: () {
             Navigator.pop(context);
           },
+        
         ),
         backgroundColor: Colors.transparent,
         elevation: 0,
